@@ -17,9 +17,6 @@ MotionDetector::MotionDetector(Capture * captureInstance):
 	abort(false),
 	last(0),
     mhi(NULL),
-    orient(NULL),
-    mask(NULL),
-    segmask(NULL),
     thresholdLimit(THRESHOLD)
 {
 	motionDetectionThread = new thread(launcher, this);
@@ -29,6 +26,12 @@ MotionDetector::~MotionDetector()
 {
 	motionDetectionThread->join();
 	delete motionDetectionThread;
+	
+	for (int i=0; i<MAX_FRAMES; i++ ) {
+		delete buf[i];
+	}
+	
+	delete mhi;
 }
 
 void MotionDetector::launcher(void * instance)
@@ -71,15 +74,7 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 			buf[i] = new Mat(Mat::zeros(size, CV_8UC1));
 		}
 		
-		/*delete mhi;
-		delete orient;
-		delete segmask;
-		delete mask;*/
-		
 		mhi = new Mat(Mat::zeros(size, CV_32FC1));
-		orient = new Mat(Mat::zeros(size, CV_32FC1));
-		segmask = new Mat(Mat::zeros(size, CV_32FC1));
-		mask = new Mat(Mat::zeros(size, CV_8UC1));
     }
 
     cvtColor( img, *buf[last], CV_BGR2GRAY ); // convert frame to grayscale

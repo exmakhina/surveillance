@@ -29,9 +29,6 @@ private:
     
     // temporary images
     cv::Mat* mhi; // MHI
-    cv::Mat* orient; // orientation
-    cv::Mat* mask; // valid orientation mask
-    cv::Mat* segmask; // motion segmentation map
 };
 
 #endif  /* _MOTIONDETECTOR_H_ */
