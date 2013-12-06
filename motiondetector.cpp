@@ -82,7 +82,7 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
     idx2 = (last + 1) % MAX_FRAMES; // index of (last - (N-1))th frame
     last = idx2;
 
-    silh = abs(buf[idx1] - buf[idx2]); 	// get difference between frames
+    silh = abs(*buf[idx1] - *buf[idx2]); 	// get difference between frames
     threshold( silh, silh, diff_threshold, 1, CV_THRESH_BINARY ); // and threshold it
     updateMotionHistory( silh, *mhi, timestamp, MHI_DURATION ); // update MHI
 
