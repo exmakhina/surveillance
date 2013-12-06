@@ -9,6 +9,9 @@
 using namespace std;
 using namespace cv;
 
+// various tracking parameters (in seconds)
+const double MHI_DURATION = 1;
+
 MotionDetector::MotionDetector(Capture * captureInstance):
 	camera(captureInstance),
 	abort(false),
@@ -65,7 +68,7 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
     // reallocate them if the frame size is changed
     if( !mhi || (mhi->size().width != size.width) || (mhi->size().height != size.height) ) {
 		for( i = 0; i < MAX_FRAMES; i++ ) {
-			buf[i] = new Mat(size, CV_8UC1);
+			buf[i] = new Mat(Mat::zeros(size, CV_8UC1));
 		}
 		
 		/*delete mhi;
@@ -73,10 +76,10 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 		delete segmask;
 		delete mask;*/
 		
-		mhi = new Mat(size, CV_32FC1);
-		orient = new Mat(size, CV_32FC1);
-		segmask = new Mat(size, CV_32FC1);
-		mask = new Mat(size, CV_8UC1);
+		mhi = new Mat(Mat::zeros(size, CV_32FC1));
+		orient = new Mat(Mat::zeros(size, CV_32FC1));
+		segmask = new Mat(Mat::zeros(size, CV_32FC1));
+		mask = new Mat(Mat::zeros(size, CV_8UC1));
     }
 
     cvtColor( img, *buf[last], CV_BGR2GRAY ); // convert frame to grayscale
@@ -90,7 +93,7 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 
     // select silhouette ROI
 	Mat silhROI = silh(comp_rect);
-	count = cvNorm( silhROI, 0, CV_L1, 0 ); // calculate number of points within silhouette ROI
+	count = norm( silhROI, 0, CV_L1, 0 ); // calculate number of points within silhouette ROI
 	
 	// check for the case of little motion
 	if( count >= comp_rect.size().width*comp_rect.size().height * 0.05 ) {

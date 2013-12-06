@@ -3,6 +3,8 @@
 #include "motiondetector.h"
 #include "capture.h"
 
+using namespace std;
+
 MotionApp::MotionApp()
 {
 	camera = new Capture();
