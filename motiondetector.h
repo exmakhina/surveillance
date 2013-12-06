@@ -1,4 +1,4 @@
-#ifdef _MOTIONDETECTOR_H_
+#ifndef _MOTIONDETECTOR_H_
 #define _MOTIONDETECTOR_H_
 
 #include <opencv2/opencv.hpp>
@@ -20,7 +20,7 @@ private:
 	void motionDetection();
 	void  update_mhi(const cv::Mat &, int);
 	
-    int threshold;
+    int thresholdLimit;
     int last;
     bool abort;
 

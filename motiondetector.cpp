@@ -13,19 +13,18 @@ MotionDetector::MotionDetector(Capture * captureInstance):
 	camera(captureInstance),
 	abort(false),
 	last(0),
-    buf(0),
-    mhi(0),
-    orient(0),
-    mask(0),
-    segmask(0),
-    threshold(THRESHOLD)
+    mhi(NULL),
+    orient(NULL),
+    mask(NULL),
+    segmask(NULL),
+    thresholdLimit(THRESHOLD)
 {
 	motionDetectionThread = new thread(launcher, this);
 }
 
 MotionDetector::~MotionDetector()
 {
-	motionDetectionThread.join();
+	motionDetectionThread->join();
 	delete motionDetectionThread;
 }
 
@@ -42,8 +41,8 @@ void MotionDetector::motionDetection()
 	cout << "MotionDetector thread started..." << endl;
 	
 	while (!abort) {
-		if (camera->getImage(&image) == 0) {
-			update_mhi(&image, threshold);
+		if (camera->getImage(image) == 0) {
+			update_mhi(image, thresholdLimit);
 		} else {
 			this_thread::sleep_for( frameTime );	// sleep the time to capture at least one new frame
 		}
@@ -56,10 +55,10 @@ void MotionDetector::motionDetection()
 void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 {
     double timestamp = (double)clock()/CLOCKS_PER_SEC; // get current time in seconds
-    Size size = img.size()		// get current frame size
+    Size size = img.size();		// get current frame size
     int i, idx1 = last, idx2;
     Mat silh;
-    Rect comp_rect(0, 0, size.width(), size.height());
+    Rect comp_rect(Point(0, 0), size);
     double count;
     
     // allocate images at the beginning or
@@ -80,14 +79,14 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 		mask = new Mat(size, CV_8UC1);
     }
 
-    cvCvtColor( img, buf[last], CV_BGR2GRAY ); // convert frame to grayscale
+    cvtColor( img, *buf[last], CV_BGR2GRAY ); // convert frame to grayscale
 
     idx2 = (last + 1) % MAX_FRAMES; // index of (last - (N-1))th frame
     last = idx2;
 
     silh = abs(buf[idx1] - buf[idx2]); 	// get difference between frames
-    cvThreshold( silh, silh, diff_threshold, 1, CV_THRESH_BINARY ); // and threshold it
-    cvUpdateMotionHistory( silh, mhi, timestamp, MHI_DURATION ); // update MHI
+    threshold( silh, silh, diff_threshold, 1, CV_THRESH_BINARY ); // and threshold it
+    updateMotionHistory( silh, *mhi, timestamp, MHI_DURATION ); // update MHI
 
     // select silhouette ROI
 	Mat silhROI = silh(comp_rect);
