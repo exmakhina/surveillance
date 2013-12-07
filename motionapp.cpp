@@ -19,5 +19,5 @@ MotionApp::~MotionApp()
 
 void MotionApp::start()
 {
-	cout << "nothing happens here... Capture and MotionDetector threads are supposed to be running at this point." << endl;
+	cout << "nothing happens here... Capture and MotionDetector threads are supposed to be running at this point.\n";
 }

@@ -44,7 +44,7 @@ void MotionDetector::motionDetection()
 	Mat image;
 	chrono::milliseconds frameTime( 1000/FPS );
 	
-	cout << "MotionDetector thread started..." << endl;
+	cout << "MotionDetector thread started...\n";
 	
 	while (!abort) {
 		if (camera->getImage(image) == 0) {
@@ -93,7 +93,7 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 	// check for the case of little motion
 	if( count >= comp_rect.size().width*comp_rect.size().height * 0.05 ) {
 		// got motion
-		cout << "Got Motion !!" << endl;
+		cout << "Got Motion !!\n";
 	} else {
 		// got nothing
 	}

@@ -17,7 +17,7 @@ Capture::Capture():
 	capture = new VideoCapture(CAM_ID);
     if ( !capture->isOpened() )
     {
-		cerr << "No webcam" << endl;
+		cerr << "No webcam\n";
 		return;
     }
     
@@ -55,12 +55,12 @@ void Capture::run()
 {
 	chrono::milliseconds frameTime( 1000/FPS );
     
-	cout << "Capture thread started..." << endl;
+	cout << "Capture thread started...\n";
 	
 	while (!abort) {
 		if ( !capture->isOpened() )
 		{
-			cerr << "No webcam" << endl;
+			cerr << "No webcam\n";
 			return;
 		}
 		
