@@ -88,7 +88,7 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 
     // select silhouette ROI
 	Mat silhROI = silh(comp_rect);
-	count = norm( silhROI, 0, CV_L1, 0 ); // calculate number of points within silhouette ROI
+	count = norm( silhROI, Mat::zeros(size, CV_8UC1), CV_L1); // calculate number of points within silhouette ROI
 	
 	// check for the case of little motion
 	if( count >= comp_rect.size().width*comp_rect.size().height * 0.05 ) {
