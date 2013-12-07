@@ -15,8 +15,8 @@ public:
 private:
 	bool abort;
 	bool pause;
-	cv::Mat image[MAX_FRAMES];	// Circular frame buffer
-    cv::VideoCapture * capture;
+	cv::Mat* image[MAX_FRAMES];	// Circular frame buffer
+    cv::VideoCapture* capture;
     int readIndex;
     int writeIndex;
     

@@ -21,6 +21,10 @@ Capture::Capture():
 		return;
     }
     
+    for (int i=0; i<MAX_FRAMES; i++) {
+    	image[i] = new Mat(640, 480, CV_8UC3);
+    }
+    
     captureThread = new thread(launcher, this);
 }
 
@@ -28,12 +32,16 @@ Capture::~Capture()
 {
 	captureThread->join();
 	delete captureThread;
+	
+	for (int i=0; i<MAX_FRAMES; i++) {
+    	delete image[i];
+    }
 }
 
 int Capture::getImage(Mat & imageRef)
 {
 	if ((readIndex != writeIndex) || pause){
-		imageRef = image[readIndex++];
+		imageRef = *image[readIndex++];
 		if (readIndex >= MAX_FRAMES) readIndex = 0;
 		//TODO: add mutex here (for pause)
 		if (pause) pause = false;		// unlock overrun condition
@@ -66,7 +74,7 @@ void Capture::run()
 		
 		if (!pause) {
 			// update image
-			capture->read(image[writeIndex++]);
+			capture->read(*image[writeIndex++]);
 			if (writeIndex >= MAX_FRAMES) writeIndex = 0;
 			//TODO: add mutex here (for pause)
 			if (writeIndex == readIndex) pause = true;		// overrun condition, pause until reader process the images
