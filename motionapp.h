@@ -3,6 +3,7 @@
 
 #include "capture.h"
 #include "motiondetector.h"
+#include "action.h"
 
 class MotionApp {
 public:
@@ -13,7 +14,8 @@ public:
 
 private:
 	MotionDetector * motionDetector;
-	Capture * camera;	
+	Capture * camera;
+	Action * fileAction;
 };
 
 #endif  /* _MOTIONAPP_H_ */

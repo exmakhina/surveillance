@@ -6,8 +6,8 @@ CFLAGS=-I. -std=c++0x -O2 -Wall
 CFLAGS+=`pkg-config --cflags opencv`
 LDFLAGS=`pkg-config --libs opencv` 
 
-SRC=capture.cpp motiondetector.cpp motionapp.cpp main.cpp
-DEPS=capture.h settings.h motiondetector.h motionapp.h
+SRC=capture.cpp motiondetector.cpp fileaction.cpp motionapp.cpp main.cpp
+DEPS=capture.h settings.h motiondetector.h action.h fileaction.h motionapp.h
 OBJ=$(SRC:.cpp=.o)
 
 .PHONY: all clean

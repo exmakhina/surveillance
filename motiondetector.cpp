@@ -1,10 +1,13 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <list>
 #include <opencv2/opencv.hpp>
 #include "settings.h"
 #include "motiondetector.h"
 #include "capture.h"
+#include "action.h"
+
 
 using namespace std;
 using namespace cv;
@@ -24,6 +27,9 @@ MotionDetector::MotionDetector(Capture * captureInstance):
 
 MotionDetector::~MotionDetector()
 {
+	list<Action*>::const_iterator it; 
+	
+	abort = true;
 	motionDetectionThread->join();
 	delete motionDetectionThread;
 	
@@ -32,6 +38,10 @@ MotionDetector::~MotionDetector()
 	}
 	
 	delete mhi;
+	
+	for (it = actionList.begin(); it != actionList.end(); ++it) {
+		delete *it;
+	}
 }
 
 void MotionDetector::launcher(void * instance)
@@ -53,6 +63,8 @@ void MotionDetector::motionDetection()
 			this_thread::sleep_for( frameTime );	// sleep the time to capture at least one new frame
 		}
     }
+    
+    cout << "MotionDetector thread stopped...\n";
 }
 
 // parameters:
@@ -66,6 +78,7 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
     Mat silh;
     Rect comp_rect(Point(0, 0), size);
     double count;
+    list<Action*>::const_iterator action;
     
     // allocate images at the beginning or
     // reallocate them if the frame size is changed
@@ -93,8 +106,17 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 	// check for the case of little motion
 	if( count >= comp_rect.size().width*comp_rect.size().height * 0.05 ) {
 		// got motion
-		cout << "Got Motion !!\n";
+		for (action = actionList.begin(); action != actionList.end(); ++action) {
+			(*action)->handler(img);
+		}
 	} else {
 		// got nothing
+	}
+}
+
+void MotionDetector::registerAction(Action * action)
+{
+	if (action) {
+		actionList.push_back(action);
 	}
 }
