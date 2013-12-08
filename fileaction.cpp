@@ -57,9 +57,10 @@ void FileAction::run()
 	vector<int> jpgParams;
     jpgParams.push_back(CV_IMWRITE_JPEG_QUALITY);
     jpgParams.push_back(90);
-    string genericName = "test_";
+    string genericName = "capture_";
     string extension = ".jpg";
-    string fileID;
+    unsigned fileID = 1;
+    string dateAndTime;
 	string filename;
 	
 	cout << "FileAction thread started...\n";
@@ -67,7 +68,14 @@ void FileAction::run()
 	while (!abort) {
 		while(!imageFIFO.empty()) {
 			tt = chrono::system_clock::to_time_t ( chrono::system_clock::now() );
-			filename = genericName + ctime(&tt) + extension;
+			dateAndTime = ctime(&tt);
+			
+			if (fileID >= FPS) fileID = 1;  // Cannot have more than "FPS" image in the same second...
+			filename = 	genericName + 
+						dateAndTime.substr(0, dateAndTime.length()-1) + 
+						"_" + 
+						to_string(fileID++) + 
+						extension;
 			
 			cout <<"saving file: " <<filename <<endl;
 			
