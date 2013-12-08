@@ -77,8 +77,6 @@ void FileAction::run()
 						to_string(fileID++) + 
 						extension;
 			
-			cout <<"saving file: " <<filename <<endl;
-			
 			FIFOlock.lock();
 			currentPicture = imageFIFO.front();
 			imwrite(filename, *currentPicture, jpgParams);
