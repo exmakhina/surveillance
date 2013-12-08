@@ -13,7 +13,6 @@ public:
 	int getImage(cv::Mat &);	// return 0 if valid frame, -1 otherwise
 	
 private:
-	bool abort;
 	bool pause;
 	cv::Mat* image[MAX_FRAMES];	// Circular frame buffer
     cv::VideoCapture* capture;
@@ -22,8 +21,8 @@ private:
     
 	static void launcher(void *);
 	std::thread * captureThread;
-	    
 	void run();
+	bool abort;
 };
 
 #endif

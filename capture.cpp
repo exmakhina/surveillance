@@ -30,6 +30,7 @@ Capture::Capture():
 
 Capture::~Capture()
 {
+	abort = true;
 	captureThread->join();
 	delete captureThread;
 	
@@ -82,4 +83,6 @@ void Capture::run()
 		
 		this_thread::sleep_for( frameTime );
 	}
+	
+	cout << "Capture thread stopped...\n";
 }
