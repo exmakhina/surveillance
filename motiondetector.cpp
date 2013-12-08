@@ -4,6 +4,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <opencv2/opencv.hpp>
+#include "opencv2/gpu/gpu.hpp"
 #include "settings.h"
 #include "motiondetector.h"
 #include "capture.h"
@@ -82,6 +83,8 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
     Rect comp_rect(Point(0, 0), size);
     double count;
     list<Action*>::const_iterator action;
+    gpu::GpuMat GpuSilh;
+    gpu::GpuMat GpuSilhROI;
     
     // allocate images at the beginning or
     // reallocate them if the frame size is changed
@@ -99,12 +102,14 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
     last = idx2;
 
     silh = abs(*buf[idx1] - *buf[idx2]); 	// get difference between frames
-    threshold( silh, silh, diff_threshold, 1, CV_THRESH_BINARY ); // and threshold it
+    GpuSilh.upload(silh);
+    gpu::threshold( GpuSilh, GpuSilh, diff_threshold, 1, CV_THRESH_BINARY ); // and threshold it
     updateMotionHistory( silh, *mhi, timestamp, MHI_DURATION ); // update MHI
 
     // select silhouette ROI
 	Mat silhROI = silh(comp_rect);
-	count = norm( silhROI, Mat::zeros(size, CV_8UC1), CV_L1); // calculate number of points within silhouette ROI
+	GpuSilhROI.upload(silhROI);
+	count = gpu::norm( GpuSilhROI, CV_L1); 	// calculate number of points within silhouette ROI
 	
 	// check for the case of little motion
 	if( count >= comp_rect.size().width*comp_rect.size().height * 0.05 ) {
