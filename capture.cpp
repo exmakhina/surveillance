@@ -43,9 +43,10 @@ Capture::~Capture()
 int Capture::getImage(Mat & imageRef)
 {
 	if ((readIndex != writeIndex) || pause){
+		lock_guard<mutex> lock(mtx);	// lock mtx for the if {} statement
+		
 		imageRef = *image[readIndex++];
 		if (readIndex >= MAX_FRAMES) readIndex = 0;
-		//TODO: add mutex here (for pause)
 		if (pause) pause = false;		// unlock overrun condition
 		return 0;
 	} else {
