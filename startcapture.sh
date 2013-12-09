@@ -1,0 +1,3 @@
+#!/bin/bash
+./motionapp &
+disown
