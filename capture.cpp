@@ -1,7 +1,6 @@
 #include "capture.h"
 #include "settings.h"
 #include <thread>
-#include <chrono>
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
@@ -64,8 +63,6 @@ void Capture::launcher(void * instance){
 
 void Capture::run()
 {
-	chrono::milliseconds frameTime( 1000/FPS );
-    
 	cout << "Capture thread started...\n";
 	
 	while (!abort) {
@@ -84,8 +81,6 @@ void Capture::run()
 			// a new image has been capture, notify the waiting thread (MotiobDetector)
 			syncCV.notify_one();
 		}
-		
-		this_thread::sleep_for( frameTime );
 	}
 	
 	cout << "Capture thread stopped...\n";

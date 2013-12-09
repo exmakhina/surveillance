@@ -52,7 +52,6 @@ void FileAction::launcher(void * instance)
 
 void FileAction::run()
 {
-	chrono::milliseconds frameTime(1000/FPS);
 	list<Mat*>::const_iterator pict;
 	Mat* currentPicture;
 	time_t tt;
@@ -91,9 +90,6 @@ void FileAction::run()
 				imageFIFO.pop_front();
 			}
 		} 
-		
-		// If no image to save, wait at least the time to capture a new one...
-		this_thread::sleep_for( frameTime );
 	}
 	
 	cout << "FileAction thread stopped...\n";

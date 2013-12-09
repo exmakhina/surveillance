@@ -1,6 +1,5 @@
 #include <iostream>
 #include <thread>
-#include <chrono>
 #include <list>
 #include <mutex>
 #include <condition_variable>
@@ -54,7 +53,6 @@ void MotionDetector::launcher(void * instance)
 void MotionDetector::motionDetection()
 {
 	Mat image;
-	chrono::milliseconds frameTime( 1000/FPS );
 	
 	cout << "MotionDetector thread started...\n";
 	
@@ -66,9 +64,7 @@ void MotionDetector::motionDetection()
 			
 		if (camera->getImage(image) == 0) {
 			update_mhi(image, thresholdLimit);
-		} else {
-			this_thread::sleep_for( frameTime );	// sleep the time to capture at least one new frame
-		}
+		} 
     }
     
     cout << "MotionDetector thread stopped...\n";
