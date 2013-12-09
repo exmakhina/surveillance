@@ -3,6 +3,8 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <mutex>
+#include <condition_variable>
 
 using namespace cv;
 using namespace std;
@@ -74,11 +76,13 @@ void Capture::run()
 		}
 		
 		if (!pause) {
+			lock_guard<mutex> lock(mtx);	// lock mtx for the whole if {} statement
 			// update image
 			capture->read(*image[writeIndex++]);
 			if (writeIndex >= MAX_FRAMES) writeIndex = 0;
-			//TODO: add mutex here (for pause)
 			if (writeIndex == readIndex) pause = true;		// overrun condition, pause until reader process the images
+			// a new image has been capture, notify the waiting thread (MotiobDetector)
+			syncCV.notify_one();
 		}
 		
 		this_thread::sleep_for( frameTime );

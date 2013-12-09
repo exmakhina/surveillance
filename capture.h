@@ -2,6 +2,8 @@
 #define _CAPTURE_H_
 
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <opencv2/opencv.hpp>
 #include "settings.h"
 
@@ -12,7 +14,11 @@ public:
 	
 	int getImage(cv::Mat &);	// return 0 if valid frame, -1 otherwise
 	
+	//std::mutex syncMutex;
+	std::condition_variable syncCV;
+	
 private:
+	std::mutex mtx;
 	bool pause;
 	cv::Mat* image[MAX_FRAMES];	// Circular frame buffer
     cv::VideoCapture* capture;

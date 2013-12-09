@@ -2,6 +2,8 @@
 #include <thread>
 #include <chrono>
 #include <list>
+#include <mutex>
+#include <condition_variable>
 #include <opencv2/opencv.hpp>
 #include "settings.h"
 #include "motiondetector.h"
@@ -57,6 +59,11 @@ void MotionDetector::motionDetection()
 	cout << "MotionDetector thread started...\n";
 	
 	while (!abort) {
+		{
+			unique_lock<mutex> lock(syncMutex);
+			camera->syncCV.wait(lock);
+		}
+			
 		if (camera->getImage(image) == 0) {
 			update_mhi(image, thresholdLimit);
 		} else {

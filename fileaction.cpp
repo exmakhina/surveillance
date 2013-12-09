@@ -6,6 +6,7 @@
 #include <ctime>
 #include <string>
 #include <mutex>
+#include <condition_variable>
 #include <opencv2/opencv.hpp>
 #include "fileaction.h"
 #include "settings.h"
@@ -34,12 +35,13 @@ FileAction::~FileAction()
 
 void FileAction::handler(const Mat& image)
 {
+	lock_guard<mutex> lock(mtx);	// hold the mutex during the execution of handler() {}
 	Mat* newImage = new Mat();
 	
-	FIFOlock.lock();
 	image.copyTo(*newImage);		// save the image locally
 	imageFIFO.push_back(newImage);	// save its address in the local FIFO
-	FIFOlock.unlock();
+	
+	syncCV.notify_one();				// notify the run() thread a new image is ready
 }
 
 // Private stuff
@@ -66,6 +68,10 @@ void FileAction::run()
 	cout << "FileAction thread started...\n";
 	
 	while (!abort) {
+		{
+			unique_lock<mutex> lock(mtx);
+			syncCV.wait(lock);		// wait until handler() call notify_one()
+		}
 		while(!imageFIFO.empty()) {
 			tt = chrono::system_clock::to_time_t ( chrono::system_clock::now() );
 			dateAndTime = ctime(&tt);
@@ -76,13 +82,14 @@ void FileAction::run()
 						"_" + 
 						to_string(fileID++) + 
 						extension;
-			
-			FIFOlock.lock();
-			currentPicture = imageFIFO.front();
-			imwrite(filename, *currentPicture, jpgParams);
-			delete currentPicture;
-			imageFIFO.pop_front();
-			FIFOlock.unlock();
+			{
+				lock_guard<mutex> fifoLock(mtx);	// lock the mutex for the current {} section (FIFO access)
+				
+				currentPicture = imageFIFO.front();
+				imwrite(filename, *currentPicture, jpgParams);
+				delete currentPicture;
+				imageFIFO.pop_front();
+			}
 		} 
 		
 		// If no image to save, wait at least the time to capture a new one...

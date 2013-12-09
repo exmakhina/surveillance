@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 #include <list>
+#include <mutex>
 #include "capture.h"
 #include "settings.h"
 #include "action.h"
@@ -19,6 +20,7 @@ public:
 private:
 	Capture * camera;
 	
+	std::mutex syncMutex;
 	static void launcher(void *);
 	std::thread * motionDetectionThread;
 	void motionDetection();
