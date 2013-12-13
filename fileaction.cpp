@@ -36,6 +36,13 @@ FileAction::~FileAction()
 void FileAction::handler(const Mat& image)
 {
 	lock_guard<mutex> lock(mtx);	// hold the mutex during the execution of handler() {}
+	
+	// Limit the number of images in the file writer waiting list
+	if (imageFIFO.size() >= MAX_FRAMES) {
+		cout << "Warning: Image Fifo overrun, skipping frame.\n";
+		return;
+	} 
+	
 	Mat* newImage = new Mat();
 	
 	image.copyTo(*newImage);		// save the image locally
