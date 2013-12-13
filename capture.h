@@ -9,7 +9,7 @@
 
 class Capture {
 public:
-	Capture();
+	Capture(int);	// int is the camera ID
 	~Capture();
 	
 	int getImage(cv::Mat &);	// return 0 if valid frame, -1 otherwise

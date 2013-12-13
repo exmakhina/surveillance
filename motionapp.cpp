@@ -4,12 +4,13 @@
 #include "capture.h"
 #include "action.h"
 #include "fileaction.h"
+#include "settings.h"
 
 using namespace std;
 
 MotionApp::MotionApp()
 {
-	camera = new Capture();
+	camera = new Capture(CAM_ID);
 	motionDetector = new MotionDetector(camera);
 	fileAction = new FileAction();
 	

@@ -8,14 +8,14 @@
 using namespace cv;
 using namespace std;
 
-Capture::Capture():
+Capture::Capture(int device):
 	abort(false),
 	pause(false),
 	capture(0),
 	readIndex(0),
 	writeIndex(0)
 {
-	capture = new VideoCapture(CAM_ID);
+	capture = new VideoCapture(device);
     if ( !capture->isOpened() )
     {
 		cerr << "No webcam\n";
