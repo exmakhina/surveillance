@@ -96,7 +96,8 @@ void FileAction::run()
 				delete currentPicture;
 				imageFIFO.pop_front();
 			}
-		} 
+		}
+		cout << "All image in the FIFO have been written to the disk.\n"; 
 	}
 	
 	cout << "FileAction thread stopped...\n";
