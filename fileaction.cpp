@@ -38,7 +38,7 @@ void FileAction::handler(const Mat& image)
 	lock_guard<mutex> lock(mtx);	// hold the mutex during the execution of handler() {}
 	
 	// Limit the number of images in the file writer waiting list
-	if (imageFIFO.size() >= MAX_FRAMES) {
+	if (imageFIFO.size() >= Settings::instance().getMaxFrames()) {
 		cout << "Warning: Image Fifo overrun, skipping frame.\n";
 		return;
 	} 
@@ -82,7 +82,7 @@ void FileAction::run()
 			tt = chrono::system_clock::to_time_t ( chrono::system_clock::now() );
 			dateAndTime = ctime(&tt);
 			
-			if (fileID >= FPS) fileID = 1;  // Cannot have more than "FPS" image in the same second...
+			if (fileID >= Settings::instance().getFPS()) fileID = 1;  // Cannot have more than "FPS" image in the same second...
 			filename = 	genericName + 
 						dateAndTime.substr(0, dateAndTime.length()-1) + 
 						"_" + 

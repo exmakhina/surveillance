@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 #include <list>
+#include <vector>
 #include <mutex>
 #include "capture.h"
 #include "settings.h"
@@ -31,7 +32,7 @@ private:
     int last;
     
     // ring image buffer
-    cv::Mat* buf[MAX_FRAMES];
+    std::vector<cv::Mat*> buf;
     
     // temporary images
     cv::Mat* mhi; // MHI

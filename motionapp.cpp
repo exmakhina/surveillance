@@ -10,7 +10,7 @@ using namespace std;
 
 MotionApp::MotionApp()
 {
-	camera = new Capture(CAM_ID);
+	camera = new Capture(Settings::instance().getCamID());
 	motionDetector = new MotionDetector(camera);
 	fileAction = new FileAction();
 	

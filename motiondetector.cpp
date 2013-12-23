@@ -2,6 +2,7 @@
 #include <thread>
 #include <list>
 #include <mutex>
+#include <vector>
 #include <condition_variable>
 #include <opencv2/opencv.hpp>
 #include "settings.h"
@@ -21,7 +22,7 @@ MotionDetector::MotionDetector(Capture * captureInstance):
 	abort(false),
 	last(0),
     mhi(NULL),
-    thresholdLimit(THRESHOLD)
+    thresholdLimit(Settings::instance().getThreshold())
 {
 	motionDetectionThread = new thread(launcher, this);
 }
@@ -34,9 +35,10 @@ MotionDetector::~MotionDetector()
 	motionDetectionThread->join();
 	delete motionDetectionThread;
 	
-	for (int i=0; i<MAX_FRAMES; i++ ) {
+	for (int i=0; i<Settings::instance().getMaxFrames(); i++ ) {
 		delete buf[i];
 	}
+	buf.clear();
 	
 	delete mhi;
 	
@@ -82,12 +84,14 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
     Rect comp_rect(Point(0, 0), size);
     double count;
     list<Action*>::const_iterator action;
+    Mat* newImage;
     
     // allocate images at the beginning or
     // reallocate them if the frame size is changed
     if( !mhi || (mhi->size().width != size.width) || (mhi->size().height != size.height) ) {
-		for( i = 0; i < MAX_FRAMES; i++ ) {
-			buf[i] = new Mat(Mat::zeros(size, CV_8UC1));
+		for( i = 0; i < Settings::instance().getMaxFrames(); i++ ) {
+			newImage = new Mat(Mat::zeros(size, CV_8UC1));
+			buf.push_back(newImage);
 		}
 		
 		mhi = new Mat(Mat::zeros(size, CV_32FC1));
@@ -95,7 +99,7 @@ void MotionDetector::update_mhi(const Mat & img, int diff_threshold )
 
     cvtColor( img, *buf[last], CV_BGR2GRAY ); // convert frame to grayscale
 
-    idx2 = (last + 1) % MAX_FRAMES; // index of (last - (N-1))th frame
+    idx2 = (last + 1) % Settings::instance().getMaxFrames(); // index of (last - (N-1))th frame
     last = idx2;
 
     silh = abs(*buf[idx1] - *buf[idx2]); 	// get difference between frames

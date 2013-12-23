@@ -4,9 +4,10 @@ CC=g++
 
 CFLAGS=-I. -std=c++0x -O2 -Wall
 CFLAGS+=`pkg-config --cflags opencv`
-LDFLAGS=`pkg-config --libs opencv` 
+LDFLAGS=`pkg-config --libs opencv`
+LDFLAGS+=-ljson 
 
-SRC=capture.cpp motiondetector.cpp fileaction.cpp motionapp.cpp main.cpp
+SRC=settings.cpp capture.cpp motiondetector.cpp fileaction.cpp motionapp.cpp main.cpp
 DEPS=capture.h settings.h motiondetector.h action.h fileaction.h motionapp.h
 OBJ=$(SRC:.cpp=.o)
 

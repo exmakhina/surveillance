@@ -4,6 +4,7 @@
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
+#include <vector>
 
 using namespace cv;
 using namespace std;
@@ -15,6 +16,8 @@ Capture::Capture(int device):
 	readIndex(0),
 	writeIndex(0)
 {
+	Mat* newImage;
+
 	capture = new VideoCapture(device);
     if ( !capture->isOpened() )
     {
@@ -22,8 +25,9 @@ Capture::Capture(int device):
 		return;
     }
     
-    for (int i=0; i<MAX_FRAMES; i++) {
-    	image[i] = new Mat(640, 480, CV_8UC3);
+    for (int i=0; i<Settings::instance().getMaxFrames(); i++) {
+    	newImage = new Mat(640, 480, CV_8UC3);
+    	image.push_back(newImage);
     }
     
     captureThread = new thread(launcher, this);
@@ -35,9 +39,10 @@ Capture::~Capture()
 	captureThread->join();
 	delete captureThread;
 	
-	for (int i=0; i<MAX_FRAMES; i++) {
+	for (int i=0; i<Settings::instance().getMaxFrames(); i++) {
     	delete image[i];
     }
+	image.clear();
 }
 
 int Capture::getImage(Mat & imageRef)
@@ -46,7 +51,7 @@ int Capture::getImage(Mat & imageRef)
 		lock_guard<mutex> lock(mtx);	// lock mtx for the if {} statement
 		
 		imageRef = *image[readIndex++];
-		if (readIndex >= MAX_FRAMES) readIndex = 0;
+		if (readIndex >= Settings::instance().getMaxFrames()) readIndex = 0;
 		if (pause) pause = false;		// unlock overrun condition
 		return 0;
 	} else {
@@ -77,7 +82,7 @@ void Capture::run()
 			lock_guard<mutex> lock(mtx);	// lock mtx for the whole if {} statement
 			// update image
 			capture->read(*image[writeIndex++]);
-			if (writeIndex >= MAX_FRAMES) writeIndex = 0;
+			if (writeIndex >= Settings::instance().getMaxFrames()) writeIndex = 0;
 			if (writeIndex == readIndex) pause = true;		// overrun condition, pause until reader process the images
 			// a new image has been capture, notify the waiting thread (MotiobDetector)
 			syncCV.notify_one();

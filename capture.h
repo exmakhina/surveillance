@@ -3,6 +3,7 @@
 
 #include <thread>
 #include <mutex>
+#include <vector>
 #include <condition_variable>
 #include <opencv2/opencv.hpp>
 #include "settings.h"
@@ -20,7 +21,7 @@ public:
 private:
 	std::mutex mtx;
 	bool pause;
-	cv::Mat* image[MAX_FRAMES];	// Circular frame buffer
+	std::vector<cv::Mat*> image;	// Circular frame buffer
     cv::VideoCapture* capture;
     int readIndex;
     int writeIndex;
