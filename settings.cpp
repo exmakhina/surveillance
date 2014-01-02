@@ -13,6 +13,7 @@ using namespace std;
 #define THRESHOLD 	30		// detector threshold
 #define BROADCASTIP "192.168.255.255"		// default broadcast address
 #define BROADCASTPORT 1976		// default broadcast port
+#define DEVICENAME "Thomas_Eye"		// Default device name
 
 // Private methods
 int Settings::refreshConfig()
@@ -48,6 +49,7 @@ int Settings::refreshConfig()
 		config["THERSHOLD"] = THRESHOLD;
 		config["BROADCASTIP"] = BROADCASTIP;
 		config["BROADCASTPORT"] = BROADCASTPORT;
+		config["DEVICENAME"] = DEVICENAME;
 
 		newConfigFile.open("settings.json");
 		if (!newConfigFile.is_open()) {
@@ -120,4 +122,13 @@ int Settings::getBroadcastPort()
 	}
 
 	return config["BROADCASTPORT"].asInt();
+}
+
+string Settings::getDeviceName()
+{
+	if (!config.isMember("DEVICENAME")) {
+		refreshConfig();
+	}
+
+	return config["DEVICENAME"].asString();
 }

@@ -7,8 +7,8 @@ CFLAGS+=`pkg-config --cflags opencv`
 LDFLAGS=`pkg-config --libs opencv`
 LDFLAGS+=-ljson 
 
-SRC=settings.cpp capture.cpp motiondetector.cpp fileaction.cpp socketexception.cpp udpsocket.cpp motionapp.cpp main.cpp
-DEPS=capture.h settings.h motiondetector.h action.h fileaction.h socketexception.h udpsocket.h motionapp.h
+SRC=settings.cpp capture.cpp motiondetector.cpp fileaction.cpp socketexception.cpp udpsocket.cpp motionapp.cpp sessionmanager.cpp main.cpp
+DEPS=capture.h settings.h motiondetector.h action.h fileaction.h socketexception.h udpsocket.h sessionmanager.h motionapp.h
 OBJ=$(SRC:.cpp=.o)
 
 .PHONY: all clean

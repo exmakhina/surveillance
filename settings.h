@@ -15,6 +15,7 @@ public:
 	int getThreshold();
 	std::string getBroadcastIP();
 	int getBroadcastPort();
+	std::string getDeviceName();
 
 private:
 	Settings() {};
