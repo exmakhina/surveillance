@@ -2,6 +2,7 @@
 #define _SETTINGS_H_
 
 #include <jsoncpp/json.h>
+#include <string>
 
 class Settings
 {
@@ -12,6 +13,8 @@ public:
 	int getFPS();
 	int getMaxFrames();
 	int getThreshold();
+	std::string getBroadcastIP();
+	int getBroadcastPort();
 
 private:
 	Settings() {};

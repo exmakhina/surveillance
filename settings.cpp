@@ -11,6 +11,8 @@ using namespace std;
 #define FPS			30		// capture speed in fps
 #define MAX_FRAMES	30		// circular buffer depth
 #define THRESHOLD 	30		// detector threshold
+#define BROADCASTIP "192.168.255.255"		// default broadcast address
+#define BROADCASTPORT 1976		// default broadcast port
 
 // Private methods
 int Settings::refreshConfig()
@@ -44,6 +46,8 @@ int Settings::refreshConfig()
 		config["FPS"] = FPS;
 		config["MAX_FRAMES"] = MAX_FRAMES;
 		config["THERSHOLD"] = THRESHOLD;
+		config["BROADCASTIP"] = BROADCASTIP;
+		config["BROADCASTPORT"] = BROADCASTPORT;
 
 		newConfigFile.open("settings.json");
 		if (!newConfigFile.is_open()) {
@@ -98,4 +102,22 @@ int Settings::getThreshold()
 	}
 
 	return config["THRESHOLD"].asInt();
+}
+
+string Settings::getBroadcastIP()
+{
+	if (!config.isMember("BROADCASTIP")) {
+		refreshConfig();
+	}
+
+	return config["BROADCASTIP"].asString();
+}
+
+int Settings::getBroadcastPort()
+{
+	if (!config.isMember("BROADCASTPORT")) {
+		refreshConfig();
+	}
+
+	return config["BROADCASTPORT"].asInt();
 }
