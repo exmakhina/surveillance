@@ -16,6 +16,8 @@ public:
 	std::string getBroadcastIP();
 	int getBroadcastPort();
 	std::string getDeviceName();
+	int getListenerPort();
+	int getMaxAllowedConnections();
 
 private:
 	Settings() {};

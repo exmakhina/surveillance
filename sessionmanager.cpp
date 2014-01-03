@@ -1,7 +1,14 @@
 #include <thread>
 #include <iostream>
 #include <chrono>
+#include <vector>
+#include <string>
 #include <jsoncpp/json.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #include "udpsocket.h"
 #include "socketexception.h"
 #include "sessionmanager.h"
@@ -39,10 +46,14 @@ void SessionManager::advertisingThread()
 	UdpSocket udpSocket;
 	Json::Value broadcastMessage;
 	chrono::milliseconds TicTac( 1000 );	// 1s
+	vector<string> IPAddr;
 
 	broadcastMessage["DeviceName"] = Settings::instance().getDeviceName();
-	broadcastMessage["ListenerPort"] = 1000;
-	broadcastMessage["ListenerIP"] = "192.168.x.x";
+	broadcastMessage["ListenerPort"] = Settings::instance().getListenerPort();
+	udpSocket.getIPs(IPAddr);
+	for (int i=0; i<IPAddr.size(); i++) {
+		broadcastMessage["ListenerIP"][to_string(i)] = IPAddr[i];		//TODO: figure out what's best: [tostring(i)] vs [i]
+	}
 
 	while (!stopAdvertising) {
 		try {

@@ -14,6 +14,8 @@ using namespace std;
 #define BROADCASTIP "192.168.255.255"		// default broadcast address
 #define BROADCASTPORT 1976		// default broadcast port
 #define DEVICENAME "Thomas_Eye"		// Default device name
+#define LISTENERPORT 2008		// Default port for the TCP socket server
+#define SERVERMAXCONNECTIONS 128  // Default maximum number of connections to the TCP server
 
 // Private methods
 int Settings::refreshConfig()
@@ -50,6 +52,8 @@ int Settings::refreshConfig()
 		config["BROADCASTIP"] = BROADCASTIP;
 		config["BROADCASTPORT"] = BROADCASTPORT;
 		config["DEVICENAME"] = DEVICENAME;
+		config["LISTENERPORT"] = LISTENERPORT;
+		config["SERVERMAXCONNECTIONS"] = SERVERMAXCONNECTIONS;
 
 		newConfigFile.open("settings.json");
 		if (!newConfigFile.is_open()) {
@@ -131,4 +135,22 @@ string Settings::getDeviceName()
 	}
 
 	return config["DEVICENAME"].asString();
+}
+
+int Settings::getListenerPort()
+{
+	if (!config.isMember("LISTENERPORT")) {
+		refreshConfig();
+	}
+
+	return config["LISTENERPORT"].asInt();
+}
+
+int Settings::getMaxAllowedConnections()
+{
+	if (!config.isMember("SERVERMAXCONNECTIONS")) {
+		refreshConfig();
+	}
+
+	return config["SERVERMAXCONNECTIONS"].asInt();
 }
