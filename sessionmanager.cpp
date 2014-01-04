@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include "udpsocket.h"
+#include "tcpsocket.h"
 #include "socketexception.h"
 #include "sessionmanager.h"
 #include "settings.h"
@@ -18,7 +19,7 @@ using namespace std;
 
 SessionManager::SessionManager():
 		stopAdvertising(false),
-		stopListennig(false)
+		stopListening(false)
 {
 	advertising = new thread(advertisingLauncher, this);
 	listener = new thread(listenerLauncher, this);
@@ -27,7 +28,7 @@ SessionManager::SessionManager():
 SessionManager::~SessionManager()
 {
 	stopAdvertising = true;
-	stopListennig = true;
+	stopListening = true;
 
 	advertising->join();
 	listener->join();
@@ -60,6 +61,7 @@ void SessionManager::advertisingThread()
 			udpSocket << broadcastMessage.toStyledString();
 		}
 		catch (SocketException& e) {
+			stopAdvertising = true;
 			cout << e.description();
 		}
 
@@ -75,10 +77,51 @@ void SessionManager::listenerLauncher(void* instance)
 void SessionManager::listenerThread()
 {
 	chrono::milliseconds TicTac( 10000 );	// 10s
+	TcpSocket serverSocket;
+	TcpSocket clientSocket;
+	string request, response;
 
-	while (!stopListennig) {
-		cout << "Listener working.\n";
+	cout << "Wait for a connection from a host.\n";
+	try {
+		serverSocket.create();
+	}
+	catch (SocketException& e) {
+		stopListening = true;
+		cout << e.description();
+	}
 
-		this_thread::sleep_for(TicTac);
+	while (!stopListening) {
+		try {
+			serverSocket.accept(clientSocket);
+		}
+		catch (SocketException& e) {
+			stopListening = true;
+			cout << e.description();
+		}
+
+		while(!stopListening) {
+			// Waiting for a request
+			cout << "Wait for a request from the host.\n";
+			try {
+				clientSocket >> request;
+			}
+			catch (SocketException& e) {
+				stopListening = true;
+				cout << e.description();
+				break;
+			}
+			cout << "Received: " << request << "\n";
+
+			// Prepare and send a response
+			response = "OK";
+			try {
+				clientSocket << response;
+			}
+			catch (SocketException& e) {
+				stopListening = true;
+				cout << e.description();
+			}
+			cout << "Response: " << response << " sent successfully.\n";
+		}
 	}
 }

@@ -26,7 +26,7 @@ private:
 	std::thread* listener;
 	static void listenerLauncher(void *);
 	void listenerThread();
-	bool stopListennig;
+	bool stopListening;
 };
 
 #endif  /* _SESSIONMANAGER_H_ */
