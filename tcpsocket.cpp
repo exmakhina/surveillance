@@ -24,6 +24,9 @@ TcpSocket::~TcpSocket()
 
 void TcpSocket::create()
 {
+	if (sockHandle >= 0)
+		throw SocketException("Socket already initialized.\n");
+
 	sockHandle = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (sockHandle < 0)
 		throw SocketException("Unable to create a TCP socket.\n");
@@ -58,6 +61,9 @@ void TcpSocket::accept(TcpSocket& newClient)
 
 void TcpSocket::connect(string& IP, int port)
 {
+	if (sockHandle >= 0)
+		throw SocketException("Socket already initialized.\n");
+
 	sockHandle = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (sockHandle < 0)
 		throw SocketException("Unable to create a TCP socket.\n");
