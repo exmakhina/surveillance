@@ -68,14 +68,18 @@ void TcpSocket::connect(string& IP, int port)
 	if (sockHandle < 0)
 		throw SocketException("Unable to create a TCP socket.\n");
 
-	/* Set socket to bind to an existing IP/PORT combination */
+	/* Set socket to connect to an existing IP/PORT combination */
 	int reuseAddrOpt = 1;
 	if (::setsockopt(sockHandle, SOL_SOCKET, SO_REUSEADDR, (void *) &reuseAddrOpt, sizeof(int) ) < 0)
 		throw SocketException("Unable to set socket options.\n");
 
+	/* setup the address to connect to */
 	if (inet_pton(AF_INET, IP.c_str(), &sockAddr.sin_addr) != 1)
 		throw SocketException("Could convert IP address to a sockaddr structure.\n");
+	sockAddr.sin_family = AF_INET;
+	sockAddr.sin_port = htons(port);
 
+	/* Connect */
 	if (::connect(sockHandle, (sockaddr*)&sockAddr, sizeof(sockaddr)) < 0)
 		throw SocketException("Cound not connect to the server socket.\n");
 }
