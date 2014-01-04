@@ -56,6 +56,24 @@ void TcpSocket::accept(TcpSocket& newClient)
 	newClient.setHandle(newSocketHandle);
 }
 
+void TcpSocket::connect(string& IP, int port)
+{
+	sockHandle = ::socket(AF_INET, SOCK_STREAM, 0);
+	if (sockHandle < 0)
+		throw SocketException("Unable to create a TCP socket.\n");
+
+	/* Set socket to bind to an existing IP/PORT combination */
+	int reuseAddrOpt = 1;
+	if (::setsockopt(sockHandle, SOL_SOCKET, SO_REUSEADDR, (void *) &reuseAddrOpt, sizeof(int) ) < 0)
+		throw SocketException("Unable to set socket options.\n");
+
+	if (inet_pton(AF_INET, IP.c_str(), &sockAddr.sin_addr) != 1)
+		throw SocketException("Could convert IP address to a sockaddr structure.\n");
+
+	if (::connect(sockHandle, (sockaddr*)&sockAddr, sizeof(sockaddr)) < 0)
+		throw SocketException("Cound not connect to the server socket.\n");
+}
+
 void TcpSocket::setHandle(int newHandle)
 {
 	if (sockHandle < 0)
