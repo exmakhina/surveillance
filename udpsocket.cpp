@@ -5,8 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
+#include <ifaddrs.h>
 #include "settings.h"
 #include "udpsocket.h"
 #include "socketexception.h"
@@ -31,25 +30,17 @@ UdpSocket::UdpSocket()
 	broadcastAddr.sin_port = htons(Settings::instance().getBroadcastPort());      /* Broadcast port */
 
 	/* Find out the local IP address */
-	ifconf conf;
-	char confData[128 * sizeof(ifreq)];	// supports up to 128 network adaptors
-
-	conf.ifc_len = sizeof(confData);
-	conf.ifc_buf = (caddr_t)confData;
-	if (::ioctl(sockHandle, SIOCGIFCONF, &conf) < 0)
-		throw SocketException("Unable to fetch the ifconfig information.\n");
-
-	ifreq* ifr = (ifreq*) conf.ifc_buf;
+	ifaddrs *ifap, *ifa;
 	sockaddr_in* sa;
 	char addrbuf[20];						// sizeof("xxx.xxx.xxx.xxx") < 20
 
-	while ((char*)ifr < conf.ifc_buf+conf.ifc_len) {
-		if (ifr->ifr_addr.sa_family == AF_INET) {	// only care about IPv4 adaptors
-			sa = (sockaddr_in*)&ifr->ifr_addr;
+	getifaddrs (&ifap);
+	for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+		if (ifa->ifa_addr->sa_family == AF_INET) {	// only care about IPv4 adaptors
+			sa = (sockaddr_in*)ifa->ifa_addr;
 			inet_ntop(AF_INET, &sa->sin_addr, addrbuf, sizeof(addrbuf));
 			localIPs.push_back(string(addrbuf));
 		}
-		ifr = (ifreq*)((char*)ifr + sizeof(ifreq));
 	}
 }
 
