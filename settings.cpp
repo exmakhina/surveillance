@@ -11,7 +11,7 @@ using namespace std;
 #define FPS			30		// capture speed in fps
 #define MAX_FRAMES	30		// circular buffer depth
 #define THRESHOLD 	30		// detector threshold
-#define BROADCASTIP "192.168.255.255"		// default broadcast address
+#define BROADCASTIP "255.255.255.255"		// default broadcast address
 #define BROADCASTPORT 1976		// default broadcast port
 #define DEVICENAME "Thomas_Eye"		// Default device name
 #define LISTENERPORT 2008		// Default port for the TCP socket server
