@@ -33,7 +33,6 @@ UdpSocket::UdpSocket()
 	/* Find out the local IP address */
 	ifconf conf;
 	char confData[128 * sizeof(ifreq)];	// supports up to 128 network adaptors
-	char addrbuf[20];						// sizeof("xxx.xxx.xxx.xxx") < 20
 
 	conf.ifc_len = sizeof(confData);
 	conf.ifc_buf = (caddr_t)confData;
@@ -41,9 +40,13 @@ UdpSocket::UdpSocket()
 		throw SocketException("Unable to fetch the ifconfig information.\n");
 
 	ifreq* ifr = (ifreq*) conf.ifc_buf;
+	sockaddr_in* sa;
+	char addrbuf[20];						// sizeof("xxx.xxx.xxx.xxx") < 20
+
 	while ((char*)ifr < conf.ifc_buf+conf.ifc_len) {
 		if (ifr->ifr_addr.sa_family == AF_INET) {	// only care about IPv4 adaptors
-			inet_ntop(ifr->ifr_addr.sa_family, &((sockaddr_in*)&ifr->ifr_addr)->sin_addr, addrbuf, sizeof(addrbuf));
+			sa = (sockaddr_in*)&ifr->ifr_addr;
+			inet_ntop(AF_INET, &sa->sin_addr, addrbuf, sizeof(addrbuf));
 			localIPs.push_back(string(addrbuf));
 		}
 		ifr = (ifreq*)((char*)ifr + sizeof(ifreq));
