@@ -84,6 +84,14 @@ void TcpSocket::connect(string& IP, int port)
 		throw SocketException("Cound not connect to the server socket.\n");
 }
 
+void TcpSocket::close()
+{
+	if (sockHandle >= 0)
+		::close(sockHandle);
+	memset(&sockAddr, 0, sizeof(sockaddr_in));
+	sockHandle = -1;
+}
+
 void TcpSocket::setHandle(int newHandle)
 {
 	if (sockHandle < 0)

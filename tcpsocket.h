@@ -17,6 +17,7 @@ public:
 	void create();
 	void accept(TcpSocket&);
 	void connect(std::string&, int); 	// Connect to a TCP IP:Port socket
+	void close();
 	void setHandle(int);	// set handle of a new created object - Does not work if the current handle >= 0
 
 private:
