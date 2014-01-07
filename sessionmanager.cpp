@@ -80,48 +80,54 @@ void SessionManager::listenerThread()
 	TcpSocket serverSocket;
 	TcpSocket clientSocket;
 	string request, response;
-
-	cout << "Wait for a connection from a host.\n";
-	try {
-		serverSocket.create();
-	}
-	catch (SocketException& e) {
-		stopListening = true;
-		cout << e.description();
-	}
+	bool sockActive = false;
 
 	while (!stopListening) {
+		cout << "Wait for a connection from a host.\n";
 		try {
-			serverSocket.accept(clientSocket);
+			serverSocket.create();
 		}
 		catch (SocketException& e) {
 			stopListening = true;
 			cout << e.description();
 		}
+		sockActive = true;
 
-		while(!stopListening) {
-			// Waiting for a request
-			cout << "Wait for a request from the host.\n";
+		while (sockActive) {
 			try {
-				clientSocket >> request;
+				serverSocket.accept(clientSocket);
 			}
 			catch (SocketException& e) {
-				stopListening = true;
+				sockActive = false;
 				cout << e.description();
-				break;
 			}
-			cout << "Received: " << request << "\n";
 
-			// Prepare and send a response
-			response = "OK";
-			try {
-				clientSocket << response;
+			while(sockActive) {
+				// Waiting for a request
+				cout << "Wait for a request from the host.\n";
+				try {
+					clientSocket >> request;
+				}
+				catch (SocketException& e) {
+					sockActive = false;
+					cout << e.description();
+					break;
+				}
+				cout << "Received: " << request << "\n";
+
+				// Prepare and send a response
+				response = "OK";
+				try {
+					clientSocket << response;
+				}
+				catch (SocketException& e) {
+					sockActive = false;
+					cout << e.description();
+				}
+				cout << "Response: " << response << " sent successfully.\n";
 			}
-			catch (SocketException& e) {
-				stopListening = true;
-				cout << e.description();
-			}
-			cout << "Response: " << response << " sent successfully.\n";
+			clientSocket.close();
 		}
+		serverSocket.close();
 	}
 }
