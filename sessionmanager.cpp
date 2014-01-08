@@ -113,9 +113,7 @@ void SessionManager::listenerThread()
 					break;
 				}
 
-				cout << "Received the request: " << request << "\n";
 				processMessage(request, response);
-				cout << "Prepare to send the response: " << response << "\n";
 
 				try {
 					clientSocket << response;
@@ -146,14 +144,19 @@ void SessionManager::processMessage(string& request, string& response)
 			if (requestContent.isMember("Command")) {
 				switch (requestContent["Command"].asInt()) {
 				case SessionManager::Start:
+					cout << "Received Start request\n";
 					prepareSuccessResponse(response, SessionManager::Start);
 					break;
 				case SessionManager::Stop:
+					cout << "Received Stop request\n";
 					prepareSuccessResponse(response, SessionManager::Stop);
 					break;
 				case SessionManager::Kill:
+					cout << "Received Kill request\n";
 					prepareSuccessResponse(response, SessionManager::Kill);
 					break;
+				default:
+					cout << "Received an unknown request\n";
 				}
 			}
 		}
