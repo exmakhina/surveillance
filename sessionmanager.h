@@ -27,6 +27,11 @@ private:
 	static void listenerLauncher(void *);
 	void listenerThread();
 	bool stopListening;
+
+	/* Message processing */
+	void processMessage(std::string&, std::string&);
+	void prepareErrorResponse(std::string&, int);
+	void prepareSuccessResponse(std::string&, int);
 };
 
 #endif  /* _SESSIONMANAGER_H_ */

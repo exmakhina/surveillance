@@ -104,7 +104,6 @@ void SessionManager::listenerThread()
 
 			while(sockActive) {
 				// Waiting for a request
-				cout << "Wait for a request from the host.\n";
 				try {
 					clientSocket >> request;
 				}
@@ -113,10 +112,11 @@ void SessionManager::listenerThread()
 					cout << e.description();
 					break;
 				}
-				cout << "Received: " << request << "\n";
 
-				// Prepare and send a response
-				response = "OK";
+				cout << "Received the request: " << request << "\n";
+				processMessage(request, response);
+				cout << "Prepare to send the response: " << response << "\n";
+
 				try {
 					clientSocket << response;
 				}
@@ -124,10 +124,60 @@ void SessionManager::listenerThread()
 					sockActive = false;
 					cout << e.description();
 				}
-				cout << "Response: " << response << " sent successfully.\n";
 			}
 			clientSocket.close();
 		}
 		serverSocket.close();
 	}
 }
+
+void SessionManager::processMessage(string& request, string& response)
+{
+	Json::Value requestMessage, requestContent;
+	Json::Reader messageParser;
+	bool res;
+
+	prepareErrorResponse(response, -1);		// default response is an error
+
+	res = messageParser.parse(request, requestMessage);
+	if (res) {
+		if (requestMessage.isMember("Request")) {
+			requestContent = requestMessage["Request"];
+			if (requestContent.isMember("Command")) {
+				switch (requestContent["Command"].asInt()) {
+				case SessionManager::Start:
+					prepareSuccessResponse(response, SessionManager::Start);
+					break;
+				case SessionManager::Stop:
+					prepareSuccessResponse(response, SessionManager::Stop);
+					break;
+				case SessionManager::Kill:
+					prepareSuccessResponse(response, SessionManager::Kill);
+					break;
+				}
+			}
+		}
+	}
+	/* else ... return the originally formatted error response */
+}
+
+void SessionManager::prepareErrorResponse(string& message, int errorCode)
+{
+	Json::Value errorMessage;
+
+	errorMessage["Response"]["Status"] = "error";
+	errorMessage["Response"]["Code"] = errorCode;
+
+	message = errorMessage.toStyledString();
+}
+
+void SessionManager::prepareSuccessResponse(string& message, int value)
+{
+	Json::Value successMessage;
+
+	successMessage["Response"]["Status"] = "ok";
+	successMessage["Response"]["Code"] = value;
+
+	message = successMessage.toStyledString();
+}
+
