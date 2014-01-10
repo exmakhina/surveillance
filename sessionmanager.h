@@ -2,11 +2,16 @@
 #define _SESSIONMANAGER_H_
 
 #include <thread>
+#include <list>
+#include <jsoncpp/json.h>
+#include "msgqueue.h"
 
 class SessionManager {
 public:
 	SessionManager();
 	~SessionManager();
+
+	void registerQueue(MsgQueue<Json::Value>&);
 
 private:
 	/* Messages */
@@ -32,6 +37,10 @@ private:
 	void processMessage(std::string&, std::string&);
 	void prepareErrorResponse(std::string&, int);
 	void prepareSuccessResponse(std::string&, int);
+
+	/* Clients message queues */
+	std::list<MsgQueue<Json::Value>*> clientQueues;
+	void dispatchMessage(Json::Value&);		// dispatch a message to all registered queues
 };
 
 #endif  /* _SESSIONMANAGER_H_ */

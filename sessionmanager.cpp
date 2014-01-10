@@ -37,6 +37,11 @@ SessionManager::~SessionManager()
 	delete listener;
 }
 
+void SessionManager::registerQueue(MsgQueue<Json::Value>& msgQueue)
+{
+	clientQueues.push_back(&msgQueue);
+}
+
 void SessionManager::advertisingLauncher(void* instance)
 {
 	static_cast<SessionManager*>(instance)->advertisingThread();
@@ -158,10 +163,20 @@ void SessionManager::processMessage(string& request, string& response)
 				default:
 					cout << "Received an unknown request\n";
 				}
+				dispatchMessage(requestContent);
 			}
 		}
 	}
 	/* else ... return the originally formatted error response */
+}
+
+void SessionManager::dispatchMessage(Json::Value& message)
+{
+	list<MsgQueue<Json::Value>*>::const_iterator it;
+
+	for (it=clientQueues.begin(); it!=clientQueues.end(); ++it) {
+		(*it)->send(message);
+	}
 }
 
 void SessionManager::prepareErrorResponse(string& message, int errorCode)
