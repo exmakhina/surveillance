@@ -34,6 +34,8 @@ SessionManager::~SessionManager()
 	advertising->join();
 	listener->join();
 
+	clientAppList.clear();
+
 	delete advertising;
 	delete listener;
 }
