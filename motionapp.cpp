@@ -30,7 +30,7 @@ int MotionApp::start()
 
 	fileAction = new FileAction();	// deleted by motionDetector
 	
-	//motionDetector->registerAction(fileAction);
+	motionDetector->registerAction(fileAction);
 
 	return 0;
 }
