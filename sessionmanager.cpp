@@ -164,6 +164,13 @@ void SessionManager::handleRequest(int request, std::string& response)
 			requestName = "Stop";
 			status = (*it)->stop();
 			break;
+		case SessionManager::Kill:
+			requestName = "Kill";
+			/* Stop application and Session Manager threads */
+			status = (*it)->stop();
+			stopListening = true;
+			stopAdvertising = true;
+			break;
 		default:
 			requestName = "Unknown";
 			status = -1;
