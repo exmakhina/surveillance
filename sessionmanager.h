@@ -4,14 +4,14 @@
 #include <thread>
 #include <list>
 #include <jsoncpp/json.h>
-#include "msgqueue.h"
+#include "appobject.h"
 
 class SessionManager {
 public:
 	SessionManager();
 	~SessionManager();
 
-	void registerQueue(MsgQueue<Json::Value>&);
+	void registerClient(AppObject*);
 
 private:
 	/* Messages */
@@ -38,9 +38,8 @@ private:
 	void prepareErrorResponse(std::string&, int);
 	void prepareSuccessResponse(std::string&, int);
 
-	/* Clients message queues */
-	std::list<MsgQueue<Json::Value>*> clientQueues;
-	void dispatchMessage(Json::Value&);		// dispatch a message to all registered queues
+	/* Clients applications */
+	std::list<AppObject*> clientAppList;
 };
 
 #endif  /* _SESSIONMANAGER_H_ */

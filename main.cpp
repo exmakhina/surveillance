@@ -1,29 +1,23 @@
 #include <iostream>
 #include <chrono>
-#include "motionapp.h"
-#include "sessionmanager.h"
+#include <thread>
+#include "application.h"
 
 using namespace std;
 
 int main() 
 {
-	chrono::milliseconds TicTac( 5000 );	// 5s
-	MotionApp * app;
-	SessionManager * sm;
-	
-	app = new MotionApp();
-	app->start();
+	Application* app;
+	chrono::milliseconds TicTac(10000);
 
-	sm = new SessionManager();
+	app = new Application();
 
 	while (1) {
-		// nothing else to but sleeping...
-		cout << "Surveillance in progress ...\n";
-		this_thread::sleep_for( TicTac );
+		cout << "Main thread running.\n";
+		this_thread::sleep_for(TicTac);
 	}
 	
 	delete app;
-	delete sm;
 
 	return 0;
 }

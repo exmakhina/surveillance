@@ -14,6 +14,7 @@
 #include "socketexception.h"
 #include "sessionmanager.h"
 #include "settings.h"
+#include "appobject.h"
 
 using namespace std;
 
@@ -35,11 +36,6 @@ SessionManager::~SessionManager()
 
 	delete advertising;
 	delete listener;
-}
-
-void SessionManager::registerQueue(MsgQueue<Json::Value>& msgQueue)
-{
-	clientQueues.push_back(&msgQueue);
 }
 
 void SessionManager::advertisingLauncher(void* instance)
@@ -138,7 +134,9 @@ void SessionManager::processMessage(string& request, string& response)
 {
 	Json::Value requestMessage, requestContent;
 	Json::Reader messageParser;
+	list<AppObject*>::const_iterator it;
 	bool res;
+	bool failedStatus = false;
 
 	prepareErrorResponse(response, -1);		// default response is an error
 
@@ -150,33 +148,34 @@ void SessionManager::processMessage(string& request, string& response)
 				switch (requestContent["Command"].asInt()) {
 				case SessionManager::Start:
 					cout << "Received Start request\n";
-					prepareSuccessResponse(response, SessionManager::Start);
+					for (it=clientAppList.begin(); it!=clientAppList.end(); ++it) {
+						if ((*it)->start() < 0) {
+							failedStatus = true;
+						}
+					}
+					if (!failedStatus)
+						prepareSuccessResponse(response, SessionManager::Start);
 					break;
 				case SessionManager::Stop:
 					cout << "Received Stop request\n";
-					prepareSuccessResponse(response, SessionManager::Stop);
+					for (it=clientAppList.begin(); it!=clientAppList.end(); ++it) {
+						if ((*it)->stop() < 0) {
+							failedStatus = true;
+						}
+					}
+					if (!failedStatus)
+						prepareSuccessResponse(response, SessionManager::Start);
 					break;
 				case SessionManager::Kill:
 					cout << "Received Kill request\n";
-					prepareSuccessResponse(response, SessionManager::Kill);
 					break;
 				default:
 					cout << "Received an unknown request\n";
 				}
-				dispatchMessage(requestContent);
 			}
 		}
 	}
 	/* else ... return the originally formatted error response */
-}
-
-void SessionManager::dispatchMessage(Json::Value& message)
-{
-	list<MsgQueue<Json::Value>*>::const_iterator it;
-
-	for (it=clientQueues.begin(); it!=clientQueues.end(); ++it) {
-		(*it)->send(message);
-	}
 }
 
 void SessionManager::prepareErrorResponse(string& message, int errorCode)
@@ -199,3 +198,8 @@ void SessionManager::prepareSuccessResponse(string& message, int value)
 	message = successMessage.toStyledString();
 }
 
+void SessionManager::registerClient(AppObject* object)
+{
+	if (object != NULL)
+		clientAppList.push_back(object);
+}
