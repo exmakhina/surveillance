@@ -2,6 +2,9 @@ TARGET = motionapp
 
 CC=g++
 
+# Flags for debug
+# CFLAGS=-I. -std=c++0x -O0 -g3 -Wall
+# Flags for releases
 CFLAGS=-I. -std=c++0x -O2 -Wall
 CFLAGS+=`pkg-config --cflags opencv`
 LDFLAGS=`pkg-config --libs opencv`
