@@ -21,7 +21,7 @@ int MotionApp::start()
 	else
 		return -1;
 
-	if (camera == NULL)
+	if (motionDetector == NULL)
 		motionDetector = new MotionDetector(camera);
 	else
 		return -1;
