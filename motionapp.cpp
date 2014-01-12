@@ -37,8 +37,8 @@ int MotionApp::start()
 
 int MotionApp::stop()
 {
-	delete camera;
 	delete motionDetector;
+	delete camera;
 
 	camera = NULL;
 	motionDetector = NULL;

@@ -32,6 +32,7 @@ MotionDetector::~MotionDetector()
 	list<Action*>::const_iterator it; 
 	
 	abort = true;
+	camera->syncCV.notify_one();   /* Send a dummy notification to unlock Motion detector thread */
 	motionDetectionThread->join();
 	delete motionDetectionThread;
 	
