@@ -83,53 +83,49 @@ void SessionManager::listenerThread()
 	TcpSocket serverSocket;
 	TcpSocket clientSocket;
 	string request, response;
-	bool sockActive = false;
+
+	try {
+		serverSocket.create();
+	}
+	catch (SocketException& e) {
+		stopListening = true;
+		cout << e.description();
+	}
 
 	while (!stopListening) {
 		cout << "Wait for a connection from a host.\n";
 		try {
-			serverSocket.create();
+			serverSocket.accept(clientSocket);
 		}
 		catch (SocketException& e) {
-			stopListening = true;
 			cout << e.description();
+			break;
 		}
-		sockActive = true;
 
-		while (sockActive) {
+		while(!stopListening) {
+			// Waiting for a request
 			try {
-				serverSocket.accept(clientSocket);
+				clientSocket >> request;
 			}
 			catch (SocketException& e) {
-				sockActive = false;
 				cout << e.description();
+				break;
 			}
 
-			while(sockActive) {
-				// Waiting for a request
-				try {
-					clientSocket >> request;
-				}
-				catch (SocketException& e) {
-					sockActive = false;
-					cout << e.description();
-					break;
-				}
+			processMessage(request, response);
 
-				processMessage(request, response);
-
-				try {
-					clientSocket << response;
-				}
-				catch (SocketException& e) {
-					sockActive = false;
-					cout << e.description();
-				}
+			try {
+				clientSocket << response;
 			}
-			clientSocket.close();
-		}
-		serverSocket.close();
-	}
+			catch (SocketException& e) {
+				cout << e.description();
+				break;
+			}
+		}   /* while (!stopListening) */
+		clientSocket.close();
+	}  /* while (!stopListening) */
+
+	serverSocket.close();
 }
 
 void SessionManager::processMessage(string& request, string& response)
