@@ -8,14 +8,20 @@
 #ifndef _APPOBJECT_H_
 #define _APPOBJECT_H_
 
+#include <string>
+
 class AppObject
 {
 public:
-	AppObject() {};
+	AppObject(std::string const& objName): prettyName(objName) {};
 	virtual ~AppObject() {};
 
 	virtual int start() {return 0;};
 	virtual int stop() {return 0;};
+	virtual void getName(std::string& objName) {objName = prettyName;};
+
+private:
+	std::string prettyName;
 };
 
 

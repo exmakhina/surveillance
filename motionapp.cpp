@@ -1,3 +1,4 @@
+#include "appobject.h"
 #include "motionapp.h"
 #include "motiondetector.h"
 #include "capture.h"
@@ -10,7 +11,8 @@ using namespace std;
 MotionApp::MotionApp():
 		camera(NULL),
 		motionDetector(NULL),
-		fileAction(NULL)
+		fileAction(NULL),
+		AppObject("MotionApp")
 {
 }
 
