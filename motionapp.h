@@ -1,16 +1,18 @@
 #ifndef _MOTIONAPP_H_
 #define _MOTIONAPP_H_
 
+#include "appobject.h"
 #include "capture.h"
 #include "motiondetector.h"
 #include "action.h"
 
-class MotionApp {
+class MotionApp : public AppObject {
 public:
 	MotionApp();
-	~MotionApp();
-	
-	void start();
+	~MotionApp() {};
+
+	int start();
+	int stop();
 
 private:
 	MotionDetector * motionDetector;

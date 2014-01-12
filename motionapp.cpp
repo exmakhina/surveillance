@@ -1,4 +1,3 @@
-#include <iostream>
 #include "motionapp.h"
 #include "motiondetector.h"
 #include "capture.h"
@@ -8,22 +7,40 @@
 
 using namespace std;
 
-MotionApp::MotionApp()
+MotionApp::MotionApp():
+		camera(NULL),
+		motionDetector(NULL),
+		fileAction(NULL)
 {
-	camera = new Capture(Settings::instance().getCamID());
-	motionDetector = new MotionDetector(camera);
-	fileAction = new FileAction();
-	
-	motionDetector->registerAction(fileAction);
 }
 
-MotionApp::~MotionApp()
+int MotionApp::start()
+{
+	if (camera == NULL)
+		camera = new Capture(Settings::instance().getCamID());
+	else
+		return -1;
+
+	if (camera == NULL)
+		motionDetector = new MotionDetector(camera);
+	else
+		return -1;
+
+	fileAction = new FileAction();	// deleted by motionDetector
+	
+	//motionDetector->registerAction(fileAction);
+
+	return 0;
+}
+
+int MotionApp::stop()
 {
 	delete camera;
 	delete motionDetector;
+
+	camera = NULL;
+	motionDetector = NULL;
+
+	return 0;
 }
 
-void MotionApp::start()
-{
-	cout << "nothing happens here... Capture and MotionDetector threads are supposed to be running at this point.\n";
-}
