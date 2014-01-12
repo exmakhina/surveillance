@@ -186,7 +186,7 @@ void SessionManager::handleRequest(int request, std::string& response)
 	// all start() calls succeeded
 	responseObject["Response"]["Application"] = "all";
 	responseObject["Response"]["Request"] = requestName;
-	responseObject["Response"]["Status"] = "OK";
+	responseObject["Response"]["Status"] = "ok";
 	responseObject["Response"]["Code"] = 0;
 	response = responseObject.toStyledString();
 }
