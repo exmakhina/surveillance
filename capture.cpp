@@ -89,5 +89,8 @@ void Capture::run()
 		}
 	}
 	
+	if (capture->isOpened())
+		capture->release();
+
 	cout << "Capture thread stopped...\n";
 }
