@@ -35,8 +35,7 @@ private:
 
 	/* Message processing */
 	void processMessage(std::string&, std::string&);
-	void prepareErrorResponse(std::string&, int);
-	void prepareSuccessResponse(std::string&, int);
+	void handleRequest(int, std::string&);	// request=SessionManager::enum value, string -> response to the host
 
 	/* Clients applications */
 	std::list<AppObject*> clientAppList;

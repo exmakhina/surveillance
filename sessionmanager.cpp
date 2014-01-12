@@ -134,68 +134,61 @@ void SessionManager::processMessage(string& request, string& response)
 {
 	Json::Value requestMessage, requestContent;
 	Json::Reader messageParser;
-	list<AppObject*>::const_iterator it;
 	bool res;
-	bool failedStatus = false;
-
-	prepareErrorResponse(response, -1);		// default response is an error
 
 	res = messageParser.parse(request, requestMessage);
 	if (res) {
 		if (requestMessage.isMember("Request")) {
 			requestContent = requestMessage["Request"];
 			if (requestContent.isMember("Command")) {
-				switch (requestContent["Command"].asInt()) {
-				case SessionManager::Start:
-					cout << "Received Start request\n";
-					for (it=clientAppList.begin(); it!=clientAppList.end(); ++it) {
-						if ((*it)->start() < 0) {
-							failedStatus = true;
-						}
-					}
-					if (!failedStatus)
-						prepareSuccessResponse(response, SessionManager::Start);
-					break;
-				case SessionManager::Stop:
-					cout << "Received Stop request\n";
-					for (it=clientAppList.begin(); it!=clientAppList.end(); ++it) {
-						if ((*it)->stop() < 0) {
-							failedStatus = true;
-						}
-					}
-					if (!failedStatus)
-						prepareSuccessResponse(response, SessionManager::Start);
-					break;
-				case SessionManager::Kill:
-					cout << "Received Kill request\n";
-					break;
-				default:
-					cout << "Received an unknown request\n";
-				}
+				handleRequest(requestContent["Command"].asInt(), response);
 			}
 		}
 	}
 	/* else ... return the originally formatted error response */
 }
 
-void SessionManager::prepareErrorResponse(string& message, int errorCode)
+void SessionManager::handleRequest(int request, std::string& response)
 {
-	Json::Value errorMessage;
+	list<AppObject*>::const_iterator it;
+	int status;
+	Json::Value responseObject;
+	string applicationName;
+	string requestName;
 
-	errorMessage["Response"]["Status"] = "error";
-	errorMessage["Response"]["Code"] = errorCode;
+	for (it=clientAppList.begin(); it!=clientAppList.end(); ++it) {
+		switch (request) {
+		case SessionManager::Start:
+			requestName = "Start";
+			status = (*it)->start();
+			break;
+		case SessionManager::Stop:
+			requestName = "Stop";
+			status = (*it)->stop();
+			break;
+		default:
+			requestName = "Unknown";
+			status = -1;
+		}
 
-	message = errorMessage.toStyledString();
-}
+		if (status < 0) {
+			// fill the response object and exit on error
+			(*it)->getName(applicationName);
+			responseObject["Response"]["Application"] = applicationName;
+			responseObject["Response"]["Request"] = requestName;
+			responseObject["Response"]["Status"] = "error";
+			responseObject["Response"]["Code"] = status;
+			response = responseObject.toStyledString();
+			return;
+		}
+	}
 
-void SessionManager::prepareSuccessResponse(string& message, int value)
-{
-	Json::Value successMessage;
-
-	successMessage["Response"]["Status"] = "ok";
-	successMessage["Response"]["Code"] = value;
-
-	message = successMessage.toStyledString();
+	// all start() calls succeeded
+	responseObject["Response"]["Application"] = "all";
+	responseObject["Response"]["Request"] = requestName;
+	responseObject["Response"]["Status"] = "OK";
+	responseObject["Response"]["Code"] = 0;
+	response = responseObject.toStyledString();
 }
 
 void SessionManager::registerClient(AppObject* object)
