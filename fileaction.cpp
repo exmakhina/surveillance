@@ -70,6 +70,7 @@ void FileAction::run()
     unsigned fileID = 1;
     string dateAndTime;
 	string filename;
+	string directory = Settings::instance().getPath();
 	
 	cout << "FileAction thread started...\n";
 	
@@ -83,7 +84,8 @@ void FileAction::run()
 			dateAndTime = ctime(&tt);
 			
 			if (fileID >= Settings::instance().getFPS()) fileID = 1;  // Cannot have more than "FPS" image in the same second...
-			filename = 	genericName + 
+			filename = 	directory +
+						genericName +
 						dateAndTime.substr(0, dateAndTime.length()-1) + 
 						"_" + 
 						to_string(fileID++) + 
