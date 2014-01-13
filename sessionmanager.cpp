@@ -20,7 +20,8 @@ using namespace std;
 
 SessionManager::SessionManager():
 		stopAdvertising(false),
-		stopListening(false)
+		stopListening(false),
+		running(true)
 {
 	advertising = new thread(advertisingLauncher, this);
 	listener = new thread(listenerLauncher, this);
@@ -70,6 +71,9 @@ void SessionManager::advertisingThread()
 
 		this_thread::sleep_for( TicTac );
 	}
+
+	running = false;
+	cout << "SessionManager advertising thread stopped.\n";
 }
 
 void SessionManager::listenerLauncher(void* instance)
@@ -126,6 +130,8 @@ void SessionManager::listenerThread()
 	}  /* while (!stopListening) */
 
 	serverSocket.close();
+	running = false;
+	cout << "SessionManager listener thread stopped.\n";
 }
 
 void SessionManager::processMessage(string& request, string& response)
@@ -200,4 +206,9 @@ void SessionManager::registerClient(AppObject* object)
 {
 	if (object != NULL)
 		clientAppList.push_back(object);
+}
+
+bool SessionManager::isRunning()
+{
+	return running;
 }

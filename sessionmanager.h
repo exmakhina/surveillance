@@ -12,6 +12,7 @@ public:
 	~SessionManager();
 
 	void registerClient(AppObject*);
+	bool isRunning();
 
 private:
 	/* Messages */
@@ -20,6 +21,8 @@ private:
 		Stop,
 		Kill
 	};
+
+	bool running;
 
 	/* advertising thread: broadcast an advertisement message over UDP */
 	std::thread* advertising;
