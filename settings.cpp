@@ -16,6 +16,7 @@ using namespace std;
 #define DEVICENAME "Thomas_Eye"		// Default device name
 #define LISTENERPORT 2008		// Default port for the TCP socket server
 #define SERVERMAXCONNECTIONS 128  // Default maximum number of connections to the TCP server
+#define PATH "/home/tgrimault/Downloads/"
 
 // Private methods
 int Settings::refreshConfig()
@@ -54,6 +55,7 @@ int Settings::refreshConfig()
 		config["DEVICENAME"] = DEVICENAME;
 		config["LISTENERPORT"] = LISTENERPORT;
 		config["SERVERMAXCONNECTIONS"] = SERVERMAXCONNECTIONS;
+		config["PATH"] = PATH;
 
 		newConfigFile.open("settings.json");
 		if (!newConfigFile.is_open()) {
@@ -153,4 +155,13 @@ int Settings::getMaxAllowedConnections()
 	}
 
 	return config["SERVERMAXCONNECTIONS"].asInt();
+}
+
+string Settings::getPath()
+{
+	if (!config.isMember("PATH")) {
+		refreshConfig();
+	}
+
+	return config["PATH"].asString();
 }

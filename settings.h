@@ -18,6 +18,7 @@ public:
 	std::string getDeviceName();
 	int getListenerPort();
 	int getMaxAllowedConnections();
+	std::string getPath();
 
 private:
 	Settings() {};
