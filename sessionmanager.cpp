@@ -15,13 +15,15 @@
 #include "sessionmanager.h"
 #include "settings.h"
 #include "appobject.h"
+#include "connector.h"
 
 using namespace std;
 
 SessionManager::SessionManager():
 		stopAdvertising(false),
 		stopListening(false),
-		running(true)
+		running(true),
+		clientApp(NULL)
 {
 	advertising = new thread(advertisingLauncher, this);
 	listener = new thread(listenerLauncher, this);
@@ -29,13 +31,17 @@ SessionManager::SessionManager():
 
 SessionManager::~SessionManager()
 {
+	list<Connector*>::const_iterator it;
+
 	stopAdvertising = true;
 	stopListening = true;
 
 	advertising->join();
 	listener->join();
 
-	clientAppList.clear();
+	for (it=connectorList.begin(); it!=connectorList.end(); ++it) {
+		delete *it;
+	}
 
 	delete advertising;
 	delete listener;
@@ -55,6 +61,7 @@ void SessionManager::advertisingThread()
 
 	broadcastMessage["DeviceName"] = Settings::instance().getDeviceName();
 	broadcastMessage["ListenerPort"] = Settings::instance().getListenerPort();
+	broadcastMessage["CurrentClientNumber"] = static_cast<int>(connectorList.size());
 	udpSocket.getIPs(IPAddr);
 	for (int i=0; i<IPAddr.size(); i++) {
 		broadcastMessage["ListenerIP"][to_string(i)] = IPAddr[i];		//TODO: figure out what's best: [tostring(i)] vs [i]
@@ -86,7 +93,7 @@ void SessionManager::listenerThread()
 	chrono::milliseconds TicTac( 10000 );	// 10s
 	TcpSocket serverSocket;
 	TcpSocket clientSocket;
-	string request, response;
+	Connector* connector;
 
 	try {
 		serverSocket.create();
@@ -106,27 +113,8 @@ void SessionManager::listenerThread()
 			break;
 		}
 
-		while(!stopListening) {
-			// Waiting for a request
-			try {
-				clientSocket >> request;
-			}
-			catch (SocketException& e) {
-				cout << e.description();
-				break;
-			}
-
-			processMessage(request, response);
-
-			try {
-				clientSocket << response;
-			}
-			catch (SocketException& e) {
-				cout << e.description();
-				break;
-			}
-		}   /* while (!stopListening) */
-		clientSocket.close();
+		connector = new Connector(clientApp, clientSocket);
+		connectorList.push_back(connector);
 	}  /* while (!stopListening) */
 
 	serverSocket.close();
@@ -134,78 +122,10 @@ void SessionManager::listenerThread()
 	cout << "SessionManager listener thread stopped.\n";
 }
 
-void SessionManager::processMessage(string& request, string& response)
-{
-	Json::Value requestMessage, requestContent;
-	Json::Reader messageParser;
-	bool res;
-
-	res = messageParser.parse(request, requestMessage);
-	if (res) {
-		if (requestMessage.isMember("Request")) {
-			requestContent = requestMessage["Request"];
-			if (requestContent.isMember("Command")) {
-				handleRequest(requestContent["Command"].asInt(), response);
-			}
-		}
-	}
-	/* else ... return the originally formatted error response */
-}
-
-void SessionManager::handleRequest(int request, std::string& response)
-{
-	list<AppObject*>::const_iterator it;
-	int status;
-	Json::Value responseObject;
-	string applicationName;
-	string requestName;
-
-	for (it=clientAppList.begin(); it!=clientAppList.end(); ++it) {
-		switch (request) {
-		case SessionManager::Start:
-			requestName = "Start";
-			status = (*it)->start();
-			break;
-		case SessionManager::Stop:
-			requestName = "Stop";
-			status = (*it)->stop();
-			break;
-		case SessionManager::Kill:
-			requestName = "Kill";
-			/* Stop application and Session Manager threads */
-			status = (*it)->stop();
-			stopListening = true;
-			stopAdvertising = true;
-			break;
-		default:
-			requestName = "Unknown";
-			status = -1;
-		}
-
-		if (status < 0) {
-			// fill the response object and exit on error
-			(*it)->getName(applicationName);
-			responseObject["Response"]["Application"] = applicationName;
-			responseObject["Response"]["Request"] = requestName;
-			responseObject["Response"]["Status"] = "error";
-			responseObject["Response"]["Code"] = status;
-			response = responseObject.toStyledString();
-			return;
-		}
-	}
-
-	// all start() calls succeeded
-	responseObject["Response"]["Application"] = "all";
-	responseObject["Response"]["Request"] = requestName;
-	responseObject["Response"]["Status"] = "ok";
-	responseObject["Response"]["Code"] = 0;
-	response = responseObject.toStyledString();
-}
-
 void SessionManager::registerClient(AppObject* object)
 {
 	if (object != NULL)
-		clientAppList.push_back(object);
+		clientApp = object;
 }
 
 bool SessionManager::isRunning()

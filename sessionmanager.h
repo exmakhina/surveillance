@@ -5,6 +5,7 @@
 #include <list>
 #include <jsoncpp/json.h>
 #include "appobject.h"
+#include "connector.h"
 
 class SessionManager {
 public:
@@ -15,13 +16,6 @@ public:
 	bool isRunning();
 
 private:
-	/* Messages */
-	enum {
-		Start = 0,
-		Stop,
-		Kill
-	};
-
 	bool running;
 
 	/* advertising thread: broadcast an advertisement message over UDP */
@@ -35,13 +29,10 @@ private:
 	static void listenerLauncher(void *);
 	void listenerThread();
 	bool stopListening;
-
-	/* Message processing */
-	void processMessage(std::string&, std::string&);
-	void handleRequest(int, std::string&);	// request=SessionManager::enum value, string -> response to the host
+	std::list<Connector*> connectorList;
 
 	/* Clients applications */
-	std::list<AppObject*> clientAppList;
+	AppObject* clientApp;
 };
 
 #endif  /* _SESSIONMANAGER_H_ */
