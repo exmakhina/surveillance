@@ -20,31 +20,49 @@
 using namespace std;
 
 SessionManager::SessionManager():
-		stopAdvertising(false),
-		stopListening(false),
-		running(true),
+		stopAdvertising(true),
+		stopListening(true),
 		clientApp(NULL)
 {
-	advertising = new thread(advertisingLauncher, this);
-	listener = new thread(listenerLauncher, this);
 }
 
-SessionManager::~SessionManager()
+void SessionManager::start()
+{
+	if (stopAdvertising)
+	{
+		stopAdvertising = false;
+		advertising = new thread(advertisingLauncher, this);
+	}
+
+	if (stopListening)
+	{
+		stopListening = false;
+		listener = new thread(listenerLauncher, this);
+	}
+}
+
+void SessionManager::stop()
 {
 	list<Connector*>::const_iterator it;
 
-	stopAdvertising = true;
-	stopListening = true;
+	if (!stopAdvertising)
+	{
+		stopAdvertising = true;
+		advertising->join();
+		delete advertising;
+	}
 
-	advertising->join();
-	listener->join();
+	if (!stopListening)
+	{
+		stopListening = true;
+		listener->join();
+		delete listener;
+	}
 
+	// delete registered clients apps
 	for (it=connectorList.begin(); it!=connectorList.end(); ++it) {
 		delete *it;
 	}
-
-	delete advertising;
-	delete listener;
 }
 
 void SessionManager::advertisingLauncher(void* instance)
@@ -79,7 +97,6 @@ void SessionManager::advertisingThread()
 		this_thread::sleep_for( TicTac );
 	}
 
-	running = false;
 	cout << "SessionManager advertising thread stopped.\n";
 }
 
@@ -119,7 +136,6 @@ void SessionManager::listenerThread()
 	}  /* while (!stopListening) */
 
 	serverSocket.close();
-	running = false;
 	cout << "SessionManager listener thread stopped.\n";
 }
 
@@ -131,5 +147,5 @@ void SessionManager::registerClient(AppObject* object)
 
 bool SessionManager::isRunning()
 {
-	return running;
+	return ~(stopListening || stopAdvertising);
 }

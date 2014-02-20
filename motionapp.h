@@ -9,10 +9,10 @@
 class MotionApp : public AppObject {
 public:
 	MotionApp();
-	~MotionApp() {};
+	~MotionApp();
 
-	int start();
-	int stop();
+	void start();
+	void stop();
 
 private:
 	MotionDetector * motionDetector;

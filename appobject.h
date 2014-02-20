@@ -16,8 +16,8 @@ public:
 	AppObject(std::string const& objName): prettyName(objName) {};
 	virtual ~AppObject() {};
 
-	virtual int start() {return 0;};
-	virtual int stop() {return 0;};
+	virtual void start() {};
+	virtual void stop() {};
 	virtual void getName(std::string& objName) {objName = prettyName;};
 
 private:

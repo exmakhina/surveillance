@@ -10,14 +10,15 @@
 class SessionManager {
 public:
 	SessionManager();
-	~SessionManager();
+	~SessionManager() {};
+
+	void start();
+	void stop();
 
 	void registerClient(AppObject*);
 	bool isRunning();
 
 private:
-	bool running;
-
 	/* advertising thread: broadcast an advertisement message over UDP */
 	std::thread* advertising;
 	static void advertisingLauncher(void *);

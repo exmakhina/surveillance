@@ -77,7 +77,7 @@ void Connector::processMessage(string& request, string& response)
 
 void Connector::handleRequest(int request, std::string& response)
 {
-	int status = -1;
+	int status = 0;
 	Json::Value responseObject;
 	string applicationName;
 	string requestName;
@@ -85,23 +85,21 @@ void Connector::handleRequest(int request, std::string& response)
 	switch (request) {
 	case Connector::Start:
 		requestName = "Start";
-		if (clientApp != NULL)
-			status = clientApp->start();
+		clientApp->start();
 		break;
 	case Connector::Stop:
 		requestName = "Stop";
-		if (clientApp != NULL)
-			status = clientApp->stop();
+		clientApp->stop();
 		break;
 	case Connector::Kill:
 		requestName = "Kill";
 		/* Stop application and Session Manager threads */
-		if (clientApp != NULL)
-			status = clientApp->stop();
+		clientApp->stop();
 		stopListening = true;
 		break;
 	default:
 		requestName = "Unknown";
+		status = -1;
 	}
 
 	if (status < 0) {

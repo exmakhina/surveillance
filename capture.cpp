@@ -9,40 +9,56 @@
 using namespace cv;
 using namespace std;
 
-Capture::Capture(int device):
-	abort(false),
+Capture::Capture(int cam):
+	abort(true),
 	pause(false),
 	capture(0),
 	readIndex(0),
-	writeIndex(0)
+	writeIndex(0),
+	device(cam)
+{
+}
+
+void Capture::start()
 {
 	Mat* newImage;
 
-	capture = new VideoCapture(device);
-    if ( !capture->isOpened() )
-    {
-		cerr << "No webcam\n";
-		return;
-    }
-    
-    for (int i=0; i<Settings::instance().getMaxFrames(); i++) {
-    	newImage = new Mat(640, 480, CV_8UC3);
-    	image.push_back(newImage);
-    }
-    
-    captureThread = new thread(launcher, this);
+	if (abort)
+	{
+		abort = false;
+
+		capture = new VideoCapture(device);
+		if ( !capture->isOpened() )
+		{
+			cerr << "No webcam\n";
+			return;
+		}
+
+		for (int i=0; i<Settings::instance().getMaxFrames(); i++) {
+			newImage = new Mat(640, 480, CV_8UC3);
+			image.push_back(newImage);
+		}
+
+		captureThread = new thread(launcher, this);
+	}
 }
 
-Capture::~Capture()
+void Capture::stop()
 {
-	abort = true;
-	captureThread->join();
-	delete captureThread;
-	
-	for (int i=0; i<Settings::instance().getMaxFrames(); i++) {
-    	delete image[i];
-    }
-	image.clear();
+	if (!abort)
+	{
+		abort = true;
+		captureThread->join();
+		delete captureThread;
+
+		for (int i=0; i<Settings::instance().getMaxFrames(); i++) {
+			delete image[i];
+		}
+		image.clear();
+
+		readIndex = 0;
+		writeIndex = 0;
+	}
 }
 
 int Capture::getImage(Mat & imageRef)

@@ -20,11 +20,17 @@ int main()
 
 	sessionManager->registerClient(motionApp);
 
+	sessionManager->start();
+	motionApp->start();
+
 	while (sessionManager->isRunning()) {
 		cout << "Main thread running.\n";
 		this_thread::sleep_for(TicTac);
 	}
 	
+	motionApp->stop();
+	sessionManager->stop();
+
 	delete sessionManager;
 	delete motionApp;
 

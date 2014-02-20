@@ -11,8 +11,11 @@
 class Capture {
 public:
 	Capture(int);	// int is the camera ID
-	~Capture();
+	~Capture() {};
 	
+	void start();
+	void stop();
+
 	int getImage(cv::Mat &);	// return 0 if valid frame, -1 otherwise
 	
 	//std::mutex syncMutex;
@@ -23,6 +26,7 @@ private:
 	bool pause;
 	std::vector<cv::Mat*> image;	// Circular frame buffer
     cv::VideoCapture* capture;
+    int device;		// Camera ID
     int readIndex;
     int writeIndex;
     
