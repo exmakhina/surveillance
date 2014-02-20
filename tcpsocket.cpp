@@ -19,7 +19,7 @@ TcpSocket::TcpSocket():
 TcpSocket::~TcpSocket()
 {
 	if (sockHandle >= 0)
-		::close(sockHandle);
+		::shutdown(sockHandle, SHUT_RDWR);
 }
 
 void TcpSocket::create()
@@ -87,7 +87,7 @@ void TcpSocket::connect(string& IP, int port)
 void TcpSocket::close()
 {
 	if (sockHandle >= 0)
-		::close(sockHandle);
+		::shutdown(sockHandle, SHUT_RDWR);
 	memset(&sockAddr, 0, sizeof(sockaddr_in));
 	sockHandle = -1;
 }
