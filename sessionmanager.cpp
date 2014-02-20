@@ -92,7 +92,7 @@ void SessionManager::listenerThread()
 {
 	chrono::milliseconds TicTac( 10000 );	// 10s
 	TcpSocket serverSocket;
-	TcpSocket clientSocket;
+	TcpSocket* clientSocket;
 	Connector* connector;
 
 	try {
@@ -105,15 +105,16 @@ void SessionManager::listenerThread()
 
 	while (!stopListening) {
 		cout << "Wait for a connection from a host.\n";
+		clientSocket = new TcpSocket();
 		try {
-			serverSocket.accept(clientSocket);
+			serverSocket.accept(*clientSocket);
 		}
 		catch (SocketException& e) {
 			cout << e.description();
 			break;
 		}
 
-		connector = new Connector(clientApp, clientSocket);
+		connector = new Connector(clientApp, *clientSocket);
 		connectorList.push_back(connector);
 	}  /* while (!stopListening) */
 
